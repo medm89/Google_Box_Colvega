@@ -29,7 +29,7 @@ class Google < Nancy::Base
     end
 
     halt 400, "Unable to login" unless account.authorized?
-    
+
     ws = g_session.spreadsheet_by_title('test').worksheets[0]
     a = []
     for row in 2..ws.num_rows
@@ -39,7 +39,7 @@ class Google < Nancy::Base
       end
     end
     ws.save
-    
+
     root = account.root
     folder = root.folders.select{|x| x.name == "folder_test"}.first
     dest = root.folders.select{|x| x.name == "folder_test_mod"}.first
@@ -53,9 +53,14 @@ class Google < Nancy::Base
         folder_files[i].move(dest)
       end
     end
-     
+
     @message = "Done"
     render "views/index.erb"
+  end
+
+  get "/logout" do
+    session["auth_token"] = nil
+    redirect "/"
   end
 end
 
