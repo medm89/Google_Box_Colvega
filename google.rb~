@@ -8,6 +8,10 @@ class Google < Nancy::Base
   include Nancy::Render # for templates
 
   get "/" do
+    if params['auth_token']
+      @message = "You've logged successfully, please press SEND again"
+      session['auth_token'] = params['auth_token']
+    end
     render "views/index.erb"
   end
 
@@ -16,6 +20,16 @@ class Google < Nancy::Base
     app_data = YAML.load_file(app_data_file)
     g_session = GoogleDrive.login(app_data['google_user'], app_data['google_pass'])
 
+    account = Box::Account.new(app_data['api_key'])
+
+    auth_token = app_data['auth_token'] || session['auth_token']
+
+    account.authorize(:auth_token => auth_token) do |auth_url|
+      redirect auth_url
+    end
+
+    halt 400, "Unable to login" unless account.authorized?
+    
     ws = g_session.spreadsheet_by_title('test').worksheets[0]
     a = []
     for row in 2..ws.num_rows
@@ -25,18 +39,7 @@ class Google < Nancy::Base
       end
     end
     ws.save
-
-    account = Box::Account.new(app_data['api_key'])
-
-    auth_token = app_data['auth_token']
-
-    account.authorize(:auth_token => auth_token) do |auth_url|
-      redirect auth_url
-    end
-
-    halt 400, "Unable to login" unless account.authorized?
-    session['auth_token'] = account.auth_token
-
+    
     root = account.root
     folder = root.folders.select{|x| x.name == "folder_test"}.first
     dest = root.folders.select{|x| x.name == "folder_test_mod"}.first
@@ -50,8 +53,9 @@ class Google < Nancy::Base
         folder_files[i].move(dest)
       end
     end
-
+     
     @message = "Done"
     render "views/index.erb"
   end
 end
+

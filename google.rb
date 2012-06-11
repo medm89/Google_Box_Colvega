@@ -29,7 +29,17 @@ class Google < Nancy::Base
     end
 
     halt 400, "Unable to login" unless account.authorized?
-
+    
+    ws = g_session.spreadsheet_by_title('test').worksheets[0]
+    a = []
+    for row in 2..ws.num_rows
+      if ws[row,2] == 'ncopy'
+        a.push(ws[row,1])
+        ws[row,2] = 'moved'
+      end
+    end
+    ws.save
+    
     root = account.root
     folder = root.folders.select{|x| x.name == "folder_test"}.first
     dest = root.folders.select{|x| x.name == "folder_test_mod"}.first
@@ -42,16 +52,6 @@ class Google < Nancy::Base
       if a.include?(file)
         folder_files[i].move(dest)
       end
-      
-    ws = g_session.spreadsheet_by_title('test').worksheets[0]
-    a = []
-    for row in 2..ws.num_rows
-      if ws[row,2] == 'ncopy'
-        a.push(ws[row,1])
-        ws[row,2] = 'moved'
-      end
-    end
-    ws.save
     end
      
     @message = "Done"
