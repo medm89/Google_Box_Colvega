@@ -14,9 +14,9 @@ class Google < Nancy::Base
   post "/" do
     app_data_file = File.expand_path(File.dirname(__FILE__)) + '/app_data.yml'
     app_data = YAML.load_file(app_data_file)
-    session = GoogleDrive.login(app_data['google_user'], app_data['google_pass'])
+    g_session = GoogleDrive.login(app_data['google_user'], app_data['google_pass'])
 
-    ws = session.spreadsheet_by_title('test').worksheets[0]
+    ws = g_session.spreadsheet_by_title('test').worksheets[0]
     a = []
     for row in 2..ws.num_rows
       if ws[row,2] == 'ncopy'
