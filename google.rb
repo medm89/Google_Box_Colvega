@@ -60,6 +60,7 @@ class Google < Nancy::Base
 
   get "/logout" do
     session["auth_token"] = nil
+    @message = nil    
     redirect "/"
   end
 end
