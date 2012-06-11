@@ -42,8 +42,8 @@ class Google < Nancy::Base
       if a.include?(file)
         folder_files[i].move(dest)
       end
-    end
-     ws = g_session.spreadsheet_by_title('test').worksheets[0]
+      
+    ws = g_session.spreadsheet_by_title('test').worksheets[0]
     a = []
     for row in 2..ws.num_rows
       if ws[row,2] == 'ncopy'
@@ -52,6 +52,8 @@ class Google < Nancy::Base
       end
     end
     ws.save
+    end
+     
     @message = "Done"
     render "views/index.erb"
   end
