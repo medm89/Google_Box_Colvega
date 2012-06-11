@@ -8,6 +8,8 @@ class Google < Nancy::Base
   include Nancy::Render # for templates
 
   get "/" do
+    @message = "You've logged successfully, please press SEND again"
+    session['auth_token'] = params['auth_token'] if params['auth_token']
     render "views/index.erb"
   end
 
@@ -28,14 +30,13 @@ class Google < Nancy::Base
 
     account = Box::Account.new(app_data['api_key'])
 
-    auth_token = app_data['auth_token']
+    auth_token = app_data['auth_token'] || session['auth_token']
 
     account.authorize(:auth_token => auth_token) do |auth_url|
       redirect auth_url
     end
 
     halt 400, "Unable to login" unless account.authorized?
-    session['auth_token'] = account.auth_token
 
     root = account.root
     folder = root.folders.select{|x| x.name == "folder_test"}.first
