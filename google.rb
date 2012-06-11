@@ -8,8 +8,10 @@ class Google < Nancy::Base
   include Nancy::Render # for templates
 
   get "/" do
-    @message = "You've logged successfully, please press SEND again"
-    session['auth_token'] = params['auth_token'] if params['auth_token']
+    if params['auth_token']
+      @message = "You've logged successfully, please press SEND again"
+      session['auth_token'] = params['auth_token']
+    end
     render "views/index.erb"
   end
 
@@ -17,16 +19,6 @@ class Google < Nancy::Base
     app_data_file = File.expand_path(File.dirname(__FILE__)) + '/app_data.yml'
     app_data = YAML.load_file(app_data_file)
     g_session = GoogleDrive.login(app_data['google_user'], app_data['google_pass'])
-
-    ws = g_session.spreadsheet_by_title('test').worksheets[0]
-    a = []
-    for row in 2..ws.num_rows
-      if ws[row,2] == 'ncopy'
-        a.push(ws[row,1])
-        ws[row,2] = 'moved'
-      end
-    end
-    ws.save
 
     account = Box::Account.new(app_data['api_key'])
 
@@ -51,8 +43,17 @@ class Google < Nancy::Base
         folder_files[i].move(dest)
       end
     end
-
+     ws = g_session.spreadsheet_by_title('test').worksheets[0]
+    a = []
+    for row in 2..ws.num_rows
+      if ws[row,2] == 'ncopy'
+        a.push(ws[row,1])
+        ws[row,2] = 'moved'
+      end
+    end
+    ws.save
     @message = "Done"
     render "views/index.erb"
   end
 end
+
