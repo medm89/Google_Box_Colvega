@@ -8,8 +8,10 @@ class Google < Nancy::Base
   include Nancy::Render # for templates
 
   get "/" do
-    @message = "You've logged successfully, please press SEND again"
-    session['auth_token'] = params['auth_token'] if params['auth_token']
+    if params['auth_token']
+      @message = "You've logged successfully, please press SEND again"
+      session['auth_token'] = params['auth_token']
+    end
     render "views/index.erb"
   end
 
