@@ -1,8 +1,9 @@
 <html>
   <body>
-<% if @message%>
-<h1><%=@message%></h1>
-<% end %>
+    <% if @message %>
+      <h1><%= @message %></h1>
+    <% end %>
+    <a href="/logout">Logout</a>
     <form method="post">
       <input type="submit" value="SEND">
     </form>
